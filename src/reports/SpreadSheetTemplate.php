@@ -1,13 +1,21 @@
 <?php
+
+require __DIR__ . '/../../vendor/autoload.php';
+
 class SpreadSheetTemplate
 {
-    private $_config = [];
-    public function __construct()
+    private $_instance_config = [
+        'logo' => null,
+        'solution_name' => 'EXAMPLE'
+    ];
+
+    public function __construct($instance_config)
     {
+        $this->_instance_config = $instance_config;
     }
 
     /**
-     * Genera un reporte en excel con el formato estándar de timbraXML y fuerza su descarga.
+     * Genera un reporte en excel con ub formato estándar y fuerza su descarga de manera opcional.
      * Los títulos de las columnas de generan automáticamente a partir de los nombres de los campos en $datos_reporte,
      * pero es posible especificar otros con el parametro $columnas['titulos'].
      * 
@@ -31,8 +39,8 @@ class SpreadSheetTemplate
 
         // Se asignan las propiedades del libro
         $spreadsheet->getProperties()->setCreator("TimbraXML") //Autor
-            ->setLastModifiedBy("TimbraXML") //Ultimo usuario que lo modificó
-            ->setTitle("Reporte TimbraXML")
+            ->setLastModifiedBy($this->_instance_config['solution_name']) //Ultimo usuario que lo modificó
+            ->setTitle("Reporte " . $this->_instance_config['solution_name'])
             ->setSubject("Reporte de " . $tipo_de_reporte)
             ->setCategory("Reporte Excel");
 
@@ -141,17 +149,18 @@ class SpreadSheetTemplate
         $spreadsheet->getActiveSheet()->setTitle('Reporte de ' . strtolower($tipo_de_reporte));
         // Inmovilizar paneles 
         $spreadsheet->getActiveSheet(0)->freezePaneByColumnAndRow(0, 3);
-        //agregando a la cabecera del excel una imagen
         $alto_cabecera = 27;
-        $objDrawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
-        $objDrawing->setName('Logo');
-        $objDrawing->setDescription('Logo');
-        $objDrawing->setPath('assets/panel/img/logo.png');
-        $objDrawing->setResizeProportional(true);
-        $objDrawing->setHeight($alto_cabecera + 5);
-        $objDrawing->setCoordinates('A1');
-        $objDrawing->setWorksheet($objsheet);
-
+        //agregando a la cabecera del excel una imagen
+        if ($this->_instance_config['logo']) {
+            $objDrawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+            $objDrawing->setName('Logo');
+            $objDrawing->setDescription('Logo');
+            $objDrawing->setPath($this->_instance_config['logo']);
+            $objDrawing->setResizeProportional(true);
+            $objDrawing->setHeight($alto_cabecera + 5);
+            $objDrawing->setCoordinates('A1');
+            $objDrawing->setWorksheet($objsheet);
+        }
         //dandole formato a la cabecera
         $objsheet->mergeCells('A1:B1');
         $objsheet->mergeCells('C1:' . $ultima_letra . '1');
