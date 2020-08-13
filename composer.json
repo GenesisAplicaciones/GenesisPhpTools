@@ -1,6 +1,6 @@
 {
-    "name": "GenesisAplicaciones/GenesisPhpTools",
-    "description": "Some libraries and function helpers commonly used by the Genesis Aplicaciones developer team across different solutions.",
+    "name": "genesisaplicaciones/genesis-php-tools",
+    "description": "Some libraries and helper functions commonly used by the Genesis Aplicaciones developer team across different solutions.",
     "keywords": [
         "toolbox",
         "php",
@@ -31,7 +31,8 @@
     ],
     "minimum-stability": "dev",
     "require": {
-        "php": ">=7.1.0"
+        "php": ">=7.1.0",
+        "phpoffice/phpspreadsheet": "dev-master"
     },
     "support": {
         "issues": "https://github.com/GenesisAplicaciones/GenesisPhpTools/issues",
@@ -41,5 +42,5 @@
         "psr-0": {
             "GenesisPhpTools": "src/"
         }
-    },
+    }
 }
