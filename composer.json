@@ -1,0 +1,45 @@
+{
+    "name": "GenesisAplicaciones/GenesisPhpTools",
+    "description": "Some libraries and function helpers commonly used by the Genesis Aplicaciones developer team across different solutions.",
+    "keywords": [
+        "toolbox",
+        "php",
+        "tools",
+        "reports",
+        "libraries",
+        "helpers"
+    ],
+    "type": "library",
+    "license": "MIT",
+    "homepage": "https://github.com/GenesisAplicaciones/GenesisPhpTools",
+    "authors": [
+        {
+            "name": "Giovanny González",
+            "email": "giovanny.gonzalez.19@gmail.com",
+            "homepage": "https://github.com/gggiovanny"
+        },
+        {
+            "name": "Amilkar Sosa",
+            "email": "amilcar.sosae@gmail.com",
+            "homepage": "https://github.com/amilcar12"
+        },
+        {
+            "name": "Erick Lugo",
+            "email": "ericklugoj@gmail.com",
+            "homepage": "https://github.com/ericklugoj"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=7.1.0"
+    },
+    "support": {
+        "issues": "https://github.com/GenesisAplicaciones/GenesisPhpTools/issues",
+        "source": "https://github.com/GenesisAplicaciones/GenesisPhpTools>"
+    },
+    "autoload": {
+        "psr-0": {
+            "GenesisPhpTools": "src/"
+        }
+    },
+}
