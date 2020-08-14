@@ -44,19 +44,19 @@ class SpreadSheetTemplate
     /**
      * Genera un reporte en excel con ub formato estándar y fuerza su descarga de manera opcional.
      * Los títulos de las columnas de generan automáticamente a partir de los nombres de los campos en $datos_reporte,
-     * pero es posible especificar otros con el parametro $columnas['titulos'].
+     * pero es posible especificar otros con el parametro $columnas['titles'].
      * 
      * @param string $tipo_de_reporte Cadena para indicar de que es el reporte (productos, cuentas, usuarios, etc).
      * @param string $texto_usuario Cadena con datos para identificar al usuario (como el RFC o razon social).
      * @param array $datos_reporte Array con los datos traidos de la BD.
      * @param boolean $forzar_descarga Indica si se forzará la descarga. Útil para cuando no se quiere forzar directamente y se quiere retornar para codificar en base64.
-     * @param array $columnas["excluidas"] Contiene un array con los nombres de las columnas excluidas de visualizarse (según los nombres de $datos_reporte). Ej. [ "excluidas" => ['id_cuenta', 'id_usuario'] ]
-     * @param array $columnas["renombradas"] Cambia los nombre de uno o más columnas especificando su nombre original. Ej. [ "renombradas" => [ "control_access" => "Acceso al portal" ] ]
-     * @param array $columnas["titulos"] Se usa para sobreescribir TODOS los títulos. Contiene un array simple con ellos. Ej. [ "titulos" => ['Cuenta', 'Nombre', 'Usuario'] ]
+     * @param array $columnas["excluded"] Contiene un array con los nombres de las columnas excluded de visualizarse (según los nombres de $datos_reporte). Ej. [ "excluded" => ['id_cuenta', 'id_usuario'] ]
+     * @param array $columnas["renamed"] Cambia los nombre de uno o más columnas especificando su nombre original. Ej. [ "renamed" => [ "control_access" => "Acceso al portal" ] ]
+     * @param array $columnas["titles"] Se usa para sobreescribir TODOS los títulos. Contiene un array simple con ellos. Ej. [ "titles" => ['Cuenta', 'Nombre', 'Usuario'] ]
      * 
      * @return PhpOffice\PhpSpreadsheet\Spreadsheet
      */
-    function generar_reporte_excel($tipo_de_reporte, $texto_usuario, $datos_reporte, $forzar_descarga = false, $columnas = null)
+    function generate_file($tipo_de_reporte, $texto_usuario, $datos_reporte, $forzar_descarga = false, $columnas = null)
     {
         //Para dar formato a los datos
         \PhpOffice\PhpSpreadsheet\Cell\Cell::setValueBinder(new \PhpOffice\PhpSpreadsheet\Cell\AdvancedValueBinder());
@@ -73,26 +73,26 @@ class SpreadSheetTemplate
         //Obteniendo la hoja de trabajo actual (la primera, por defecto).
         $objsheet = $spreadsheet->getActiveSheet();
 
-        // Se agregan los titulos del reporte
+        // Se agregan los titles del reporte
         $col = 0;
         $fila = 2;
-        if (isset($columnas['titulos']) && $columnas['titulos']) {
-            foreach ($columnas['titulos'] as $titulo) {
+        if (isset($columnas['titles']) && $columnas['titles']) {
+            foreach ($columnas['titles'] as $titulo) {
                 $col++;
                 $objsheet->setCellValueByColumnAndRow($col, $fila, $titulo);
             }
         } else {
             if ($datos_reporte) {
                 foreach ($datos_reporte[0] as $key => $value) {
-                    if (isset($columnas['excluidas'])) {
-                        if (!in_array($key, $columnas['excluidas'])) {
+                    if (isset($columnas['excluded'])) {
+                        if (!in_array($key, $columnas['excluded'])) {
                             $col++;
-                            $titulo = isset($columnas['renombradas'][$key]) ? $columnas['renombradas'][$key] :  ucfirst(str_replace("_", " ", $key));
+                            $titulo = isset($columnas['renamed'][$key]) ? $columnas['renamed'][$key] :  ucfirst(str_replace("_", " ", $key));
                             $objsheet->setCellValueByColumnAndRow($col, $fila, $titulo);
                         }
                     } else {
                         $col++;
-                        $titulo = isset($columnas['renombradas'][$key]) ? $columnas['renombradas'][$key] :  ucfirst(str_replace("_", " ", $key));
+                        $titulo = isset($columnas['renamed'][$key]) ? $columnas['renamed'][$key] :  ucfirst(str_replace("_", " ", $key));
                         $objsheet->setCellValueByColumnAndRow($col, $fila, $titulo);
                     }
                 }
@@ -103,8 +103,8 @@ class SpreadSheetTemplate
             $fila++;
             $col = 0;
             foreach ($row as $key => $value) {
-                if (isset($columnas['excluidas'])) {
-                    if (!in_array($key, $columnas['excluidas'])) {
+                if (isset($columnas['excluded'])) {
+                    if (!in_array($key, $columnas['excluded'])) {
                         $col++;
                         $colChar = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
                         $objsheet->setCellValue($colChar . $fila, $value);
