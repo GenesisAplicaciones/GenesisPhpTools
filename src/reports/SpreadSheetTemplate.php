@@ -4,14 +4,29 @@ namespace GenesisPhpTools;
 
 class SpreadSheetTemplate
 {
-    private $_instance_config = [
+    private $_doc_config = [
         'logo' => null,
-        'solution_name' => 'EXAMPLE'
+        'logo_wide' => null,
+        'logo_square' => null,
+        'solution_name' => 'example2',
+        'title' => null,
+        'subject' => null,
+        'category' => null,
+        'last_modified_by' => null,
     ];
 
-    public function __construct($instance_config)
+    public function __construct($doc_config = null)
     {
-        $this->_instance_config = $instance_config;
+        // Si se para un array de doc_config, solamente actualizar los campos necesarios para no afectar a los que ya existen por defecto que no se especificaron en el nuevo doc_config.
+        if($doc_config) {
+            foreach ($doc_config as $key => $value) {
+                $this->_doc_config[$key] = $value;
+            }
+        }
+        // Si se pasa un logo_wide o logo_square especificamente, se conserva su valor, pero si solo se pasa un logo sin especificar, este se usa para los otros logos de diferente relacion de aspecto
+        $this->_doc_config['logo_wide'] = $this->_doc_config['logo_wide'] ?: $this->_doc_config['logo'];
+        $this->_doc_config['logo_square'] = $this->_doc_config['logo_square'] ?: $this->_doc_config['logo'];
+        
     }
 
     /**
@@ -39,10 +54,10 @@ class SpreadSheetTemplate
 
         // Se asignan las propiedades del libro
         $spreadsheet->getProperties()->setCreator("TimbraXML") //Autor
-            ->setLastModifiedBy($this->_instance_config['solution_name']) //Ultimo usuario que lo modificó
-            ->setTitle("Reporte " . $this->_instance_config['solution_name'])
-            ->setSubject("Reporte de " . $tipo_de_reporte)
-            ->setCategory("Reporte Excel");
+            ->setLastModifiedBy($this->_doc_config['last_modified_by'] ?: $this->_doc_config['solution_name']) //Ultimo usuario que lo modificó
+            ->setTitle($this->_doc_config['title'] ?: "Reporte de " . $this->_doc_config['solution_name'])
+            ->setSubject($this->_doc_config['subject'] ?: "Reporte de " . $tipo_de_reporte)
+            ->setCategory($this->_doc_config['category'] ?: "Reporte Excel");
 
         //Obteniendo la hoja de trabajo actual (la primera, por defecto).
         $objsheet = $spreadsheet->getActiveSheet();
@@ -151,11 +166,11 @@ class SpreadSheetTemplate
         $spreadsheet->getActiveSheet(0)->freezePaneByColumnAndRow(0, 3);
         $alto_cabecera = 27;
         //agregando a la cabecera del excel una imagen
-        if ($this->_instance_config['logo']) {
+        if ($this->_doc_config['logo']) {
             $objDrawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
             $objDrawing->setName('Logo');
             $objDrawing->setDescription('Logo');
-            $objDrawing->setPath($this->_instance_config['logo']);
+            $objDrawing->setPath($this->_doc_config['logo']);
             $objDrawing->setResizeProportional(true);
             $objDrawing->setHeight($alto_cabecera + 5);
             $objDrawing->setCoordinates('A1');
