@@ -33,9 +33,9 @@ class SpreadSheetTemplate
     {
         ini_set("memory_limit", "512M");
         //Para dar formato a los datos
-        PhpOffice\PhpSpreadsheet\Cell\Cell::setValueBinder(new \PhpOffice\PhpSpreadsheet\Cell\AdvancedValueBinder());
+        \PhpOffice\PhpSpreadsheet\Cell\Cell::setValueBinder(new \PhpOffice\PhpSpreadsheet\Cell\AdvancedValueBinder());
         //Creacion del objeto
-        $spreadsheet = new PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
 
         // Se asignan las propiedades del libro
         $spreadsheet->getProperties()->setCreator("TimbraXML") //Autor
@@ -186,7 +186,7 @@ class SpreadSheetTemplate
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment;filename="' . $filename . '"');
             header('Cache-Control: max-age=0');
-            $writer = new PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
             $writer->save('php://output');
         }
 
