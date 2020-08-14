@@ -177,7 +177,7 @@ class SpreadSheetTemplate
         $spreadsheet->getActiveSheet(0)->freezePaneByColumnAndRow(0, 3);
         $alto_cabecera = 27;
         //agregando a la cabecera del excel una imagen
-        if ($this->_doc_config['logo']) {
+        if ($this->_doc_config['logo_wide']) {
             $objDrawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
             $objDrawing->setName('Logo');
             $objDrawing->setDescription('Logo');
@@ -187,10 +187,14 @@ class SpreadSheetTemplate
             $objDrawing->setCoordinates('A1');
             $objDrawing->setWorksheet($objsheet);
         }
-        //dandole formato a la cabecera
-        $objsheet->mergeCells('A1:B1');
-        $objsheet->mergeCells('C1:' . $ultima_letra . '1');
-        $objsheet->setCellValue('C1', "REPORTE DE " . strtoupper($tipo_de_reporte) . " | " . $texto_usuario);
+        //dandole formato al titulo
+        if ($this->_doc_config['logo_wide']) {
+            $objsheet->mergeCells('A1:B1');
+            $objsheet->mergeCells('C1:' . $ultima_letra . '1');
+        } else {
+            $objsheet->mergeCells('A1:' . $ultima_letra . '1');
+        }
+        $objsheet->setCellValue($this->_doc_config['logo_wide'] ? 'C1' : 'A1', "REPORTE DE " . strtoupper($tipo_de_reporte) . " | " . $texto_usuario);
         $objsheet->getStyle('A1:' . $ultima_letra . '1')->applyFromArray($estilos_cabeceras);
         $objsheet->getRowDimension(1)->setRowHeight($alto_cabecera);
 
