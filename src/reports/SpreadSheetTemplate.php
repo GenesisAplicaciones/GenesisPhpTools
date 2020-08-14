@@ -13,6 +13,10 @@ class SpreadSheetTemplate
         'subject' => null,
         'category' => null,
         'last_modified_by' => null,
+        'color_title_bg' => 'FFFFFF',
+        'color_title_font' => '000000',
+        'color_headers_bg' => 'FFA0A0A0', //color de background del heaader
+        'color_table_border' => 'FFA0A0A0',
     ];
 
     public function __construct($doc_config = null)
@@ -110,22 +114,22 @@ class SpreadSheetTemplate
         }
         $ultima_letra = $colChar ?: 'E';
 
-        //configuracion de estilos
-        $estilos_cabecera = array(
+        //configuracion de estilos 
+        $estilos_titulo = array(
             'alignment' => array(
                 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
             ),
             'fill' => array(
                 'type' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                'color' => array('rgb' => 'FFFFFF'),
+                'color' => array('rgb' => $this->_doc_config['color_title_bg']),
             ),
             'font' => array(
                 'bold' => true,
-                'color' => array('rgb' => '000000')
+                'color' => array('rgb' => $this->_doc_config['color_title_font'])
             )
         );
 
-        $estilos_titulos = [
+        $estilos_cabeceras = [
             'font' => [
                 'bold' => true,
             ],
@@ -142,10 +146,10 @@ class SpreadSheetTemplate
                 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
                 'rotation' => 90,
                 'startColor' => [
-                    'argb' => 'FFA0A0A0',
+                    'argb' => $this->_doc_config['color_headers_bg'],
                 ],
                 'endColor' => [
-                    'argb' => 'FFA0A0A0',
+                    'argb' => $this->_doc_config['color_headers_bg'],
                 ],
             ],
         ];
@@ -154,7 +158,7 @@ class SpreadSheetTemplate
             'borders' => [
                 'outline' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM,
-                    'color' => ['argb' => 'FFA0A0A0'],
+                    'color' => ['argb' => $this->_doc_config['color_table_border']],
                 ],
             ],
         ];
@@ -180,7 +184,7 @@ class SpreadSheetTemplate
         $objsheet->mergeCells('A1:B1');
         $objsheet->mergeCells('C1:' . $ultima_letra . '1');
         $objsheet->setCellValue('C1', "REPORTE DE " . strtoupper($tipo_de_reporte) . " | " . $texto_usuario);
-        $objsheet->getStyle('A1:' . $ultima_letra . '1')->applyFromArray($estilos_titulos);
+        $objsheet->getStyle('A1:' . $ultima_letra . '1')->applyFromArray($estilos_cabeceras);
         $objsheet->getRowDimension(1)->setRowHeight($alto_cabecera);
 
         //configurando ancho de las columnas
@@ -190,8 +194,8 @@ class SpreadSheetTemplate
         }
 
         //aplicando estilos
-        $objsheet->getStyle('A1:' . $ultima_letra . '1')->applyFromArray($estilos_cabecera);
-        $objsheet->getStyle('A2:' . $ultima_letra . '2')->applyFromArray($estilos_titulos);
+        $objsheet->getStyle('A1:' . $ultima_letra . '1')->applyFromArray($estilos_titulo);
+        $objsheet->getStyle('A2:' . $ultima_letra . '2')->applyFromArray($estilos_cabeceras);
         $objsheet->getStyle('A2:' . $ultima_letra . $fila)->applyFromArray($cuerpo_tabla);
         $objsheet->getStyle('D3:D' . $fila)
             ->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
