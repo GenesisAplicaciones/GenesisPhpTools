@@ -39,8 +39,8 @@
         "source": "https://github.com/GenesisAplicaciones/GenesisPhpTools>"
     },
     "autoload": {
-        "psr-0": {
-            "GenesisPhpTools": "src/"
+        "psr-4": {
+            "GenesisPhpTools": "src/reports/"
         }
     }
 }

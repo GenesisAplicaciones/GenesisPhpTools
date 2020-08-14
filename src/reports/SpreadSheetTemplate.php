@@ -1,6 +1,6 @@
 <?php
 
-require __DIR__ . '/../../vendor/autoload.php';
+namespace GenesisPhpTools;
 
 class SpreadSheetTemplate
 {
