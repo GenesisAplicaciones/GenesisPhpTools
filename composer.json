@@ -31,8 +31,8 @@
     ],
     "minimum-stability": "dev",
     "require": {
-        "php": ">=7.1.0",
-        "phpoffice/phpspreadsheet": "dev-master"
+        "php": "^7.1",
+        "phpoffice/phpspreadsheet": "^1.10"
     },
     "support": {
         "issues": "https://github.com/GenesisAplicaciones/GenesisPhpTools/issues",
