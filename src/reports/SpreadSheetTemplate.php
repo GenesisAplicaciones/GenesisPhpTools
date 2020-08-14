@@ -5,6 +5,7 @@ namespace GenesisPhpTools;
 class SpreadSheetTemplate
 {
     private $_doc_config = [
+        'memory_limit' => '512',
         'logo' => null,
         'logo_wide' => null,
         'logo_square' => null,
@@ -22,6 +23,10 @@ class SpreadSheetTemplate
 
     public function __construct($doc_config = null)
     {
+        // Esta configuracion permite especificar el limite de memoria o evitar que se ejecute poniendo 'memory_limit' en false
+        if($this->_doc_config['memory_limit']) {
+            ini_set("memory_limit", $this->_doc_config['memory_limit']);
+        }
         // Si se para un array de doc_config, solamente actualizar los campos necesarios para no afectar a los que ya existen por defecto que no se especificaron en el nuevo doc_config.
         if($doc_config) {
             foreach ($doc_config as $key => $value) {
@@ -53,7 +58,6 @@ class SpreadSheetTemplate
      */
     function generar_reporte_excel($tipo_de_reporte, $texto_usuario, $datos_reporte, $forzar_descarga = false, $columnas = null)
     {
-        ini_set("memory_limit", "512M");
         //Para dar formato a los datos
         \PhpOffice\PhpSpreadsheet\Cell\Cell::setValueBinder(new \PhpOffice\PhpSpreadsheet\Cell\AdvancedValueBinder());
         //Creacion del objeto
