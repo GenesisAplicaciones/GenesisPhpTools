@@ -13,10 +13,11 @@ class SpreadSheetTemplate
         'subject' => null,
         'category' => null,
         'last_modified_by' => null,
+        'table_color' => 'FFA0A0A0',
         'color_title_bg' => 'FFFFFF',
         'color_title_font' => '000000',
-        'color_headers_bg' => 'FFA0A0A0', //color de background del heaader
-        'color_table_border' => 'FFA0A0A0',
+        'color_headers_bg' => null, //color de background del heaader
+        'color_table_border' => null,
     ];
 
     public function __construct($doc_config = null)
@@ -27,10 +28,12 @@ class SpreadSheetTemplate
                 $this->_doc_config[$key] = $value;
             }
         }
-        // Si se pasa un logo_wide o logo_square especificamente, se conserva su valor, pero si solo se pasa un logo sin especificar, este se usa para los otros logos de diferente relacion de aspecto
+        // Si no se especifica un logo para una relacion de aspecto, usar por defecto el valor de 'logo'
         $this->_doc_config['logo_wide'] = $this->_doc_config['logo_wide'] ?: $this->_doc_config['logo'];
         $this->_doc_config['logo_square'] = $this->_doc_config['logo_square'] ?: $this->_doc_config['logo'];
-        
+        // Si no se especifica colores para los headers o los bordes, usarp por defecto table_color
+        $this->_doc_config['color_headers_bg'] = $this->_doc_config['color_headers_bg'] ?: $this->_doc_config['table_color'];
+        $this->_doc_config['color_table_border'] = $this->_doc_config['color_table_border'] ?: $this->_doc_config['table_color'];
     }
 
     /**
