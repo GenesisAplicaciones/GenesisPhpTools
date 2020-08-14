@@ -5,7 +5,7 @@ namespace GenesisPhpTools;
 class SpreadSheetTemplate
 {
     private $_doc_config = [
-        'memory_limit' => '512',
+        'owner_info' => null, //Cadena con datos para identificar al usuario (como el RFC o razon social).
         'logo' => null,
         'logo_wide' => null,
         'logo_square' => null,
@@ -19,6 +19,7 @@ class SpreadSheetTemplate
         'color_title_font' => '000000',
         'color_headers_bg' => null, //color de background del heaader
         'color_table_border' => null,
+        'memory_limit' => false,
     ];
 
     public function __construct($doc_config = null)
@@ -43,20 +44,19 @@ class SpreadSheetTemplate
 
     /**
      * Genera un reporte en excel con ub formato estándar y fuerza su descarga de manera opcional.
-     * Los títulos de las columnas de generan automáticamente a partir de los nombres de los campos en $datos_reporte,
-     * pero es posible especificar otros con el parametro $columnas['titles'].
+     * Los títulos de las columnas de generan automáticamente a partir de los nombres de los campos en $report_data,
+     * pero es posible especificar otros con el parametro $columns['titles'].
      * 
-     * @param string $tipo_de_reporte Cadena para indicar de que es el reporte (productos, cuentas, usuarios, etc).
-     * @param string $texto_usuario Cadena con datos para identificar al usuario (como el RFC o razon social).
-     * @param array $datos_reporte Array con los datos traidos de la BD.
-     * @param boolean $forzar_descarga Indica si se forzará la descarga. Útil para cuando no se quiere forzar directamente y se quiere retornar para codificar en base64.
-     * @param array $columnas["excluded"] Contiene un array con los nombres de las columnas excluded de visualizarse (según los nombres de $datos_reporte). Ej. [ "excluded" => ['id_cuenta', 'id_usuario'] ]
-     * @param array $columnas["renamed"] Cambia los nombre de uno o más columnas especificando su nombre original. Ej. [ "renamed" => [ "control_access" => "Acceso al portal" ] ]
-     * @param array $columnas["titles"] Se usa para sobreescribir TODOS los títulos. Contiene un array simple con ellos. Ej. [ "titles" => ['Cuenta', 'Nombre', 'Usuario'] ]
+     * @param string $report_name Cadena para indicar de que es el reporte (productos, cuentas, usuarios, etc).
+     * @param array $report_data Array con los datos traidos de la BD.
+     * @param boolean $force_download Indica si se forzará la descarga. Útil para cuando no se quiere forzar directamente y se quiere retornar para codificar en base64.
+     * @param array $columns["excluded"] Contiene un array con los nombres de las columnas excluded de visualizarse (según los nombres de $report_data). Ej. [ "excluded" => ['id_cuenta', 'id_usuario'] ]
+     * @param array $columns["renamed"] Cambia los nombre de uno o más columnas especificando su nombre original. Ej. [ "renamed" => [ "control_access" => "Acceso al portal" ] ]
+     * @param array $columns["titles"] Se usa para sobreescribir TODOS los títulos. Contiene un array simple con ellos. Ej. [ "titles" => ['Cuenta', 'Nombre', 'Usuario'] ]
      * 
      * @return PhpOffice\PhpSpreadsheet\Spreadsheet
      */
-    function generate_file($tipo_de_reporte, $texto_usuario, $datos_reporte, $forzar_descarga = false, $columnas = null)
+    function generate_file($report_name, $report_data, $force_download = false,  $columns = null)
     {
         //Para dar formato a los datos
         \PhpOffice\PhpSpreadsheet\Cell\Cell::setValueBinder(new \PhpOffice\PhpSpreadsheet\Cell\AdvancedValueBinder());
@@ -67,7 +67,7 @@ class SpreadSheetTemplate
         $spreadsheet->getProperties()->setCreator("TimbraXML") //Autor
             ->setLastModifiedBy($this->_doc_config['last_modified_by'] ?: $this->_doc_config['solution_name']) //Ultimo usuario que lo modificó
             ->setTitle($this->_doc_config['title'] ?: "Reporte de " . $this->_doc_config['solution_name'])
-            ->setSubject($this->_doc_config['subject'] ?: "Reporte de " . $tipo_de_reporte)
+            ->setSubject($this->_doc_config['subject'] ?: "Reporte de " . $report_name)
             ->setCategory($this->_doc_config['category'] ?: "Reporte Excel");
 
         //Obteniendo la hoja de trabajo actual (la primera, por defecto).
@@ -76,35 +76,35 @@ class SpreadSheetTemplate
         // Se agregan los titles del reporte
         $col = 0;
         $fila = 2;
-        if (isset($columnas['titles']) && $columnas['titles']) {
-            foreach ($columnas['titles'] as $titulo) {
+        if (isset($columns['titles']) && $columns['titles']) {
+            foreach ($columns['titles'] as $titulo) {
                 $col++;
                 $objsheet->setCellValueByColumnAndRow($col, $fila, $titulo);
             }
         } else {
-            if ($datos_reporte) {
-                foreach ($datos_reporte[0] as $key => $value) {
-                    if (isset($columnas['excluded'])) {
-                        if (!in_array($key, $columnas['excluded'])) {
+            if ($report_data) {
+                foreach ($report_data[0] as $key => $value) {
+                    if (isset($columns['excluded'])) {
+                        if (!in_array($key, $columns['excluded'])) {
                             $col++;
-                            $titulo = isset($columnas['renamed'][$key]) ? $columnas['renamed'][$key] :  ucfirst(str_replace("_", " ", $key));
+                            $titulo = isset($columns['renamed'][$key]) ? $columns['renamed'][$key] :  ucfirst(str_replace("_", " ", $key));
                             $objsheet->setCellValueByColumnAndRow($col, $fila, $titulo);
                         }
                     } else {
                         $col++;
-                        $titulo = isset($columnas['renamed'][$key]) ? $columnas['renamed'][$key] :  ucfirst(str_replace("_", " ", $key));
+                        $titulo = isset($columns['renamed'][$key]) ? $columns['renamed'][$key] :  ucfirst(str_replace("_", " ", $key));
                         $objsheet->setCellValueByColumnAndRow($col, $fila, $titulo);
                     }
                 }
             }
         }
         // Escribiendo los datos del reporte en el excel
-        foreach ($datos_reporte as $i => $row) {
+        foreach ($report_data as $i => $row) {
             $fila++;
             $col = 0;
             foreach ($row as $key => $value) {
-                if (isset($columnas['excluded'])) {
-                    if (!in_array($key, $columnas['excluded'])) {
+                if (isset($columns['excluded'])) {
+                    if (!in_array($key, $columns['excluded'])) {
                         $col++;
                         $colChar = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
                         $objsheet->setCellValue($colChar . $fila, $value);
@@ -116,7 +116,7 @@ class SpreadSheetTemplate
                 }
             }
         }
-        if (!$datos_reporte) {
+        if (!$report_data) {
             $objsheet->setCellValue('A' . $fila, 'Sin registros');
         }
         $ultima_letra = $colChar ?: 'E';
@@ -172,7 +172,7 @@ class SpreadSheetTemplate
 
 
         // Se asigna el nombre a la hoja
-        $spreadsheet->getActiveSheet()->setTitle('Reporte de ' . strtolower($tipo_de_reporte));
+        $spreadsheet->getActiveSheet()->setTitle('Reporte de ' . strtolower($report_name));
         // Inmovilizar paneles 
         $spreadsheet->getActiveSheet(0)->freezePaneByColumnAndRow(0, 3);
         $alto_cabecera = 27;
@@ -194,7 +194,7 @@ class SpreadSheetTemplate
         } else {
             $objsheet->mergeCells('A1:' . $ultima_letra . '1');
         }
-        $objsheet->setCellValue($this->_doc_config['logo_wide'] ? 'C1' : 'A1', "REPORTE DE " . strtoupper($tipo_de_reporte) . " | " . $texto_usuario);
+        $objsheet->setCellValue($this->_doc_config['logo_wide'] ? 'C1' : 'A1', "REPORTE DE " . strtoupper($report_name) . ($this->_doc_config['owner_info'] ? " | " . $this->_doc_config['owner_info']: ''));
         $objsheet->getStyle('A1:' . $ultima_letra . '1')->applyFromArray($estilos_cabeceras);
         $objsheet->getRowDimension(1)->setRowHeight($alto_cabecera);
 
@@ -211,15 +211,19 @@ class SpreadSheetTemplate
         $objsheet->getStyle('D3:D' . $fila)
             ->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
 
-        if ($forzar_descarga) {
-            $filename = "REPORTE_" . strtoupper($tipo_de_reporte) . "(" . $texto_usuario . ").xlsx";
+        $filename = "REPORTE_" . strtoupper($report_name) . ($this->_doc_config['owner_info'] ? "(" . $this->_doc_config['owner_info'] . ")" : '') . ".xlsx";
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        if ($force_download) {
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment;filename="' . $filename . '"');
             header('Cache-Control: max-age=0');
-            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
             $writer->save('php://output');
+        } else {
+            ob_start();
+            $writer->save('php://output');
+            $file = ob_get_contents();
+            ob_end_clean();
+            return $file;
         }
-
-        return $spreadsheet;
     }
 }
