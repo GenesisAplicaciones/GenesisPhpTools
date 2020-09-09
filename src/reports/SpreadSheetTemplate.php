@@ -25,11 +25,11 @@ class SpreadSheetTemplate
     public function __construct($doc_config = null)
     {
         // Esta configuracion permite especificar el limite de memoria o evitar que se ejecute poniendo 'memory_limit' en false
-        if($this->_doc_config['memory_limit']) {
+        if ($this->_doc_config['memory_limit']) {
             ini_set("memory_limit", $this->_doc_config['memory_limit']);
         }
         // Si se para un array de doc_config, solamente actualizar los campos necesarios para no afectar a los que ya existen por defecto que no se especificaron en el nuevo doc_config.
-        if($doc_config) {
+        if ($doc_config) {
             foreach ($doc_config as $key => $value) {
                 $this->_doc_config[$key] = $value;
             }
@@ -194,7 +194,7 @@ class SpreadSheetTemplate
         } else {
             $objsheet->mergeCells('A1:' . $ultima_letra . '1');
         }
-        $objsheet->setCellValue($this->_doc_config['logo_wide'] ? 'C1' : 'A1', "REPORTE DE " . strtoupper($report_name) . ($this->_doc_config['owner_info'] ? " | " . $this->_doc_config['owner_info']: ''));
+        $objsheet->setCellValue($this->_doc_config['logo_wide'] ? 'C1' : 'A1', "REPORTE DE " . strtoupper($report_name) . ($this->_doc_config['owner_info'] ? " | " . $this->_doc_config['owner_info'] : ''));
         $objsheet->getStyle('A1:' . $ultima_letra . '1')->applyFromArray($estilos_cabeceras);
         $objsheet->getRowDimension(1)->setRowHeight($alto_cabecera);
 
@@ -211,19 +211,64 @@ class SpreadSheetTemplate
         $objsheet->getStyle('D3:D' . $fila)
             ->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
 
-        $filename = "REPORTE_" . strtoupper($report_name) . ($this->_doc_config['owner_info'] ? "(" . $this->_doc_config['owner_info'] . ")" : '') . ".xlsx";
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $filename = "REPORTE_" . strtoupper($report_name) . ($this->_doc_config['owner_info'] ? "(" . $this->_doc_config['owner_info'] . ")" : '');
         if ($force_download) {
-            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            header('Content-Disposition: attachment;filename="' . $filename . '"');
-            header('Cache-Control: max-age=0');
-            $writer->save('php://output');
+            self::forceDownload($spreadsheet, $filename);
         } else {
-            ob_start();
-            $writer->save('php://output');
-            $file = ob_get_contents();
-            ob_end_clean();
-            return $file;
+            return self::getFile($spreadsheet);
         }
+    }
+
+    public static function generate_template($template_title, $template_fields, $force_download = true)
+    {
+        //Para dar formato a los datos
+        \PhpOffice\PhpSpreadsheet\Cell\Cell::setValueBinder(new \PhpOffice\PhpSpreadsheet\Cell\AdvancedValueBinder());
+        //Creacion del objeto
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        //Obteniendo la hoja de trabajo actual (la primera, por defecto).
+        $objsheet = $spreadsheet->getActiveSheet();
+
+        // Se agregan los titles del reporte
+        $col = 0;
+        $fila = 1;
+        foreach ($template_fields as $titulo) {
+            $col++;
+            $objsheet->setCellValueByColumnAndRow($col, $fila, $titulo);
+        }
+        $ultima_letra = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
+
+        // Se asigna el nombre a la hoja
+        $spreadsheet->getActiveSheet()->setTitle($template_title);
+        // Inmovilizar paneles 
+        //configurando ancho de las columnas
+        for ($i = 'A'; $i <= $ultima_letra; $i++) {
+            // $objsheet->getColumnDimension($i)->setAutoSize(true);
+            $objsheet->getColumnDimension($i)->setWidth(20);
+        }
+
+        if ($force_download) {
+            self::forceDownload($spreadsheet, $template_title, false);
+        } else {
+            return self::getFile($spreadsheet, false);
+        }
+    }
+
+    public static function getFile($spreadsheet, $xlsx = true)
+    {
+        $writer = $xlsx ? new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet) : new \PhpOffice\PhpSpreadsheet\Writer\Xls($spreadsheet);
+        ob_start();
+        $writer->save('php://output');
+        $file = ob_get_contents();
+        ob_end_clean();
+        return $file;
+    }
+
+    public static function forceDownload($spreadsheet, $title, $xlsx = true)
+    {
+        header('Content-Type: application/vnd.' . ($xlsx ? 'openxmlformats-officedocument.spreadsheetml.sheet' : 'ms-excel'));
+        header('Content-Disposition: attachment;filename="' . $title . ($xlsx  ? ".xlsx" : ".xls") . '"');
+        header('Cache-Control: max-age=0');
+        $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, $xlsx ? 'Xlsx' : 'Xls');
+        $writer->save('php://output');
     }
 }
