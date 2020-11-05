@@ -6,6 +6,7 @@ class SpreadSheetTemplate
 {
     private $_doc_config = [
         'owner_info' => null, //Cadena con datos para identificar al usuario (como el RFC o razon social).
+        'owner_info_for_filename' => null, //Cadena con datos para identificar al usuario, pero se pone en el nombre del archivo (como el RFC o razon social).
         'logo' => null,
         'logo_wide' => null,
         'logo_square' => null,
@@ -76,7 +77,7 @@ class SpreadSheetTemplate
         // Se agregan los titles del reporte
         $col = 0;
         $fila = 2;
-        if (isset($columns['titles']) && $columns['titles']) {
+        if (!empty($columns['titles'])) {
             foreach ($columns['titles'] as $titulo) {
                 $col++;
                 $objsheet->setCellValueByColumnAndRow($col, $fila, $titulo);
@@ -84,15 +85,15 @@ class SpreadSheetTemplate
         } else {
             if ($report_data) {
                 foreach ($report_data[0] as $key => $value) {
-                    if (isset($columns['excluded'])) {
+                    if (!empty($columns['excluded'])) {
                         if (!in_array($key, $columns['excluded'])) {
                             $col++;
-                            $titulo = isset($columns['renamed'][$key]) ? $columns['renamed'][$key] :  ucfirst(str_replace("_", " ", $key));
+                            $titulo = !empty($columns['renamed'][$key]) ? $columns['renamed'][$key] :  ucfirst(str_replace("_", " ", $key));
                             $objsheet->setCellValueByColumnAndRow($col, $fila, $titulo);
                         }
                     } else {
                         $col++;
-                        $titulo = isset($columns['renamed'][$key]) ? $columns['renamed'][$key] :  ucfirst(str_replace("_", " ", $key));
+                        $titulo = !empty($columns['renamed'][$key]) ? $columns['renamed'][$key] :  ucfirst(str_replace("_", " ", $key));
                         $objsheet->setCellValueByColumnAndRow($col, $fila, $titulo);
                     }
                 }
@@ -103,7 +104,7 @@ class SpreadSheetTemplate
             $fila++;
             $col = 0;
             foreach ($row as $key => $value) {
-                if (isset($columns['excluded'])) {
+                if (!empty($columns['excluded'])) {
                     if (!in_array($key, $columns['excluded'])) {
                         $col++;
                         $colChar = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
@@ -211,7 +212,9 @@ class SpreadSheetTemplate
         $objsheet->getStyle('D3:D' . $fila)
             ->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
 
-        $filename = "REPORTE_" . strtoupper($report_name) . ($this->_doc_config['owner_info'] ? "(" . $this->_doc_config['owner_info'] . ")" : '');
+        $owner_info_for_file = $this->_doc_config['owner_info_for_filename'] ?: $this->_doc_config['owner_info'];
+        $filename = "REPORTE_" . strtoupper($report_name) . ($owner_info_for_file ? "(" . $owner_info_for_file . ")" : '');
+        
         if ($force_download) {
             self::forceDownload($spreadsheet, $filename);
         } else {
