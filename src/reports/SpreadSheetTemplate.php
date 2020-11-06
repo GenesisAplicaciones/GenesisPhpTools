@@ -2,8 +2,11 @@
 
 namespace GenesisPhpTools;
 
+<<<<<<< HEAD
 // cambio de prueba
 
+=======
+>>>>>>> Cambios varios
 class SpreadSheetTemplate
 {
     private $_doc_config = [
@@ -22,6 +25,10 @@ class SpreadSheetTemplate
         'color_title_font' => '000000',
         'color_headers_bg' => null, //color de background del heaader
         'color_table_border' => null,
+<<<<<<< HEAD
+=======
+        'color_title_table' => '000000', // Color fuente de la cabecera de la tabla
+>>>>>>> Cambios varios
         'memory_limit' => false,
     ];
 
@@ -127,6 +134,10 @@ class SpreadSheetTemplate
         //configuracion de estilos 
         $estilos_titulo = array(
             'alignment' => array(
+<<<<<<< HEAD
+=======
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+>>>>>>> Cambios varios
                 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
             ),
             'fill' => array(
@@ -142,6 +153,10 @@ class SpreadSheetTemplate
         $estilos_cabeceras = [
             'font' => [
                 'bold' => true,
+<<<<<<< HEAD
+=======
+                'color' => array('rgb' => $this->_doc_config['color_title_table'])
+>>>>>>> Cambios varios
             ],
             'alignment' => [
                 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
@@ -175,9 +190,15 @@ class SpreadSheetTemplate
 
 
         // Se asigna el nombre a la hoja
+<<<<<<< HEAD
         $spreadsheet->getActiveSheet()->setTitle('Reporte de ' . strtolower($report_name));
         // Inmovilizar paneles 
         $spreadsheet->getActiveSheet(0)->freezePaneByColumnAndRow(0, 3);
+=======
+        $spreadsheet->getActiveSheet()->setTitle($report_name);
+        // Inmovilizar paneles 
+        // $spreadsheet->getActiveSheet(0)->freezePaneByColumnAndRow(0, 3); // Se comenta por que al generar el reporte no se puede mover hacia la derecha
+>>>>>>> Cambios varios
         $alto_cabecera = 27;
         //agregando a la cabecera del excel una imagen
         if ($this->_doc_config['logo_wide']) {
@@ -197,8 +218,12 @@ class SpreadSheetTemplate
         } else {
             $objsheet->mergeCells('A1:' . $ultima_letra . '1');
         }
+<<<<<<< HEAD
         $objsheet->setCellValue($this->_doc_config['logo_wide'] ? 'C1' : 'A1', "REPORTE DE " . strtoupper($report_name) . ($this->_doc_config['owner_info'] ? " | " . $this->_doc_config['owner_info'] : ''));
         $objsheet->getStyle('A1:' . $ultima_letra . '1')->applyFromArray($estilos_cabeceras);
+=======
+        $objsheet->setCellValue($this->_doc_config['logo_wide'] ? 'C1' : 'A1', "REPORTE DE " . strtoupper($report_name) . ($this->_doc_config['owner_info'] ? " | " . $this->_doc_config['owner_info'] : ''));        
+>>>>>>> Cambios varios
         $objsheet->getRowDimension(1)->setRowHeight($alto_cabecera);
 
         //configurando ancho de las columnas
