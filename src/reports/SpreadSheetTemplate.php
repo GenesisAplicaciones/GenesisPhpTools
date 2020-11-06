@@ -2,8 +2,6 @@
 
 namespace GenesisPhpTools;
 
-// cambio de prueba
-
 class SpreadSheetTemplate
 {
     private $_doc_config = [
@@ -22,6 +20,7 @@ class SpreadSheetTemplate
         'color_title_font' => '000000',
         'color_headers_bg' => null, //color de background del heaader
         'color_table_border' => null,
+        'color_title_table' => '000000', // Color fuente de la cabecera de la tabla
         'memory_limit' => false,
     ];
 
@@ -127,6 +126,7 @@ class SpreadSheetTemplate
         //configuracion de estilos 
         $estilos_titulo = array(
             'alignment' => array(
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
             ),
             'fill' => array(
@@ -142,6 +142,7 @@ class SpreadSheetTemplate
         $estilos_cabeceras = [
             'font' => [
                 'bold' => true,
+                'color' => array('rgb' => $this->_doc_config['color_title_table'])
             ],
             'alignment' => [
                 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
@@ -175,9 +176,9 @@ class SpreadSheetTemplate
 
 
         // Se asigna el nombre a la hoja
-        $spreadsheet->getActiveSheet()->setTitle('Reporte de ' . strtolower($report_name));
+        $spreadsheet->getActiveSheet()->setTitle($report_name);
         // Inmovilizar paneles 
-        $spreadsheet->getActiveSheet(0)->freezePaneByColumnAndRow(0, 3);
+        // $spreadsheet->getActiveSheet(0)->freezePaneByColumnAndRow(0, 3); // Se comenta por que al generar el reporte no se puede mover hacia la derecha
         $alto_cabecera = 27;
         //agregando a la cabecera del excel una imagen
         if ($this->_doc_config['logo_wide']) {
@@ -197,8 +198,7 @@ class SpreadSheetTemplate
         } else {
             $objsheet->mergeCells('A1:' . $ultima_letra . '1');
         }
-        $objsheet->setCellValue($this->_doc_config['logo_wide'] ? 'C1' : 'A1', "REPORTE DE " . strtoupper($report_name) . ($this->_doc_config['owner_info'] ? " | " . $this->_doc_config['owner_info'] : ''));
-        $objsheet->getStyle('A1:' . $ultima_letra . '1')->applyFromArray($estilos_cabeceras);
+        $objsheet->setCellValue($this->_doc_config['logo_wide'] ? 'C1' : 'A1', "REPORTE DE " . strtoupper($report_name) . ($this->_doc_config['owner_info'] ? " | " . $this->_doc_config['owner_info'] : ''));        
         $objsheet->getRowDimension(1)->setRowHeight($alto_cabecera);
 
         //configurando ancho de las columnas
