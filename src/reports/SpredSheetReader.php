@@ -37,8 +37,7 @@ class SpredSheetReader
         }
 
         // quitando campos nulos
-
-        return $procesedData;
+        return self::cleanData($procesedData);
     }
 
     public static function columns_are_valid($file_columns, $expected_columns)
@@ -62,4 +61,38 @@ class SpredSheetReader
             $fileType == "application/vnd.ms-excel" ||
             $fileType == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
     }
+
+    public static function cleanData($procesedData) {
+        foreach ($procesedData as &$row) {
+            foreach ($row as $key => $value) {
+                if(self::empty_field($value)) {
+                    unset($row[$key]);
+                }
+            }
+        }
+        return $procesedData;
+    }
+
+    /**
+	 * Función para validar si están vacíos campos enviados por el usuario.
+	 * A diferencia de la funcion empty() nativa, si marca como vacías cadenas tipo "   " 
+	 * y también permite definir como excepciones valores que normalmente serían 
+	 * tomados como vacíos (por defecto 0 y '0').
+	 * 
+	 * @param $field El campo a validar si está vacío.
+	 * @param Array $exceptions El array con los valores que normalmente se considerarían vacíos que se desea que se consideren como "llenos".
+	 */
+	public static function empty_field(&$field, $exceptions = [0, '0']) { //el '&' es para pasar el parametro como referencia y permitir pasar datos nulls o sin definir, y manejalos dentro de la función
+		// si no está definido, está vacío
+		if(!isset($field)) {
+			return true;
+		}
+		// en este punto se sabe que si está definido el valor
+		// checar si es igual a una de las excepciones, y si es una de ellas, retornar false indicando que no está vacío
+		if(in_array($field, $exceptions, true)) { // se ejecuta in_array en modo estricto para que sea exactamente igual al valor indicado en $exceptions
+			return false;
+		}
+		// finalmente, se le hace trim para quitar espacios en blanco y luego checar si está vacío con la funcion empty
+		return empty(trim($field));
+	}
 }
