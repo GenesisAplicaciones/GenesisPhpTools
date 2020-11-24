@@ -68,8 +68,8 @@ class SpreadSheetTemplate
         // Se asignan las propiedades del libro
         $spreadsheet->getProperties()->setCreator("TimbraXML") //Autor
             ->setLastModifiedBy($this->_doc_config['last_modified_by'] ?: $this->_doc_config['solution_name']) //Ultimo usuario que lo modificó
-            ->setTitle($this->_doc_config['title'] ?: "Reporte de " . $this->_doc_config['solution_name'])
-            ->setSubject($this->_doc_config['subject'] ?: "Reporte de " . $report_name)
+            ->setTitle($this->_doc_config['title'] ?: $this->_doc_config['solution_name'])
+            ->setSubject($this->_doc_config['subject'] ?: $report_name)
             ->setCategory($this->_doc_config['category'] ?: "Reporte Excel");
 
         //Obteniendo la hoja de trabajo actual (la primera, por defecto).
@@ -198,7 +198,7 @@ class SpreadSheetTemplate
         } else {
             $objsheet->mergeCells('A1:' . $ultima_letra . '1');
         }
-        $objsheet->setCellValue($this->_doc_config['logo_wide'] ? 'C1' : 'A1', "REPORTE DE " . strtoupper($report_name) . ($this->_doc_config['owner_info'] ? " | " . $this->_doc_config['owner_info'] : ''));        
+        $objsheet->setCellValue($this->_doc_config['logo_wide'] ? 'C1' : 'A1', strtoupper($report_name) . ($this->_doc_config['owner_info'] ? " | " . $this->_doc_config['owner_info'] : ''));        
         $objsheet->getRowDimension(1)->setRowHeight($alto_cabecera);
 
         //configurando ancho de las columnas
@@ -215,7 +215,7 @@ class SpreadSheetTemplate
             ->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
 
         $owner_info_for_file = $this->_doc_config['owner_info_for_filename'] ?: $this->_doc_config['owner_info'];
-        $filename = "REPORTE_" . strtoupper($report_name) . ($owner_info_for_file ? "(" . $owner_info_for_file . ")" : '');
+        $filename = strtoupper($report_name) . ($owner_info_for_file ? "(" . $owner_info_for_file . ")" : '');
         
         if ($force_download) {
             self::forceDownload($spreadsheet, $filename);
