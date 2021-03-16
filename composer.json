@@ -32,7 +32,8 @@
     "minimum-stability": "dev",
     "require": {
         "php": "^7.1",
-        "phpoffice/phpspreadsheet": "^1.10"
+        "phpoffice/phpspreadsheet": "^1.10",
+        "neitanod/forceutf8": "^2.0"
     },
     "support": {
         "issues": "https://github.com/GenesisAplicaciones/GenesisPhpTools/issues",
@@ -40,7 +41,8 @@
     },
     "autoload": {
         "psr-4": {
-            "GenesisPhpTools\\": "src/reports/"
+            "GenesisPhpTools\\": "src/",
+            "GenesisPhpTools\\Utils\\": "src/utils/"
         }
     }
 }
