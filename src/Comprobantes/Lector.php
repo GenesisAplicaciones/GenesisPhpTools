@@ -4,6 +4,7 @@ namespace GenesisPhpTools\Comprobantes;
 
 use GenesisPhpTools\Utils\Helpers;
 use \stdClass;
+use \SimpleXMLElement;
 
 class Lector
 {
@@ -43,14 +44,14 @@ class Lector
             // entonces se lee cada uno de los sets de atributos y se regresa como un array de sets de atributos (donde a su vez cada set es un array)
             foreach ($nodo_a_leer as $i => $subnodo) {
                 foreach ($subnodo->attributes() as $key => $value) {
-                    $atributos[$i][$key] = $value->__toString();
+                    $atributos[$i][$key] = Helpers::fix_utf8($value->__toString());
                 }
             }
         } else {
             // si se envió $nodo_es_multiple = false, se espera que el nodo a leer tenga un solo hijo
             // entonces se leen los atributos de ese único hijo y se devuelve un array de atributos
             foreach ($nodo_a_leer[0]->attributes() as $key => $value) {
-                $atributos[$key] = $value->__toString();
+                $atributos[$key] = Helpers::fix_utf8($value->__toString());
             }
         }
         return $atributos;
@@ -64,9 +65,7 @@ class Lector
          * ? Poniendo temporalmente un error handler custom para que los warnings que se
          * ? generan abajo se vuelvan excepciones y pueda usarse un bloque try-catch
          */
-        set_error_handler(function ($severity, $message, $file, $line) {
-            throw new \ErrorException($message, $severity, $severity, $file, $line);
-        });
+        Helpers::set_strict_error_handler();
         try {
             $cadena_filtrada = str_replace(array("\\\quot;", "&#10;", "\\n", "\\r", "\\\""), array("\quot;", " ", "", "", '"'), utf8_decode($cadena_xml));
             $this->xml = simplexml_load_string($cadena_filtrada);
@@ -539,5 +538,45 @@ class Lector
         $OBJ_TIMBRAXML = (object)$NODO_TIMBRAXML;
         $this->cfdi->TIMBRAXML = $OBJ_TIMBRAXML;
         return $OBJ_TIMBRAXML; // retornando el $OBJ_TIMBRAXML para cuando se use la funcion independientemente.
+    }
+
+    public function leer_retencion(String $xml_str)
+    {
+        $retencion = new stdClass();
+        // cuando es un string XML traido de la BD, hay que remplazar los siguientes caracteres
+        $xml_str = str_replace(array("\\\quot;", "&#10;", "\\n", "\\r", "\\\""), array("\quot;", " ", "", "", '"'), $xml_str);
+        $xml = new SimpleXMLElement($xml_str);
+        // si no se pudo cargar el xml, regresar false
+        if (!$xml) {
+            return FALSE;
+        }
+        // registrando namespaces a utilizar
+        $xml->registerXPathNamespace('retenciones', 'http://www.sat.gob.mx/esquemas/retencionpago/1');
+        $xml->registerXPathNamespace('dividendos', 'http://www.sat.gob.mx/esquemas/retencionpago/1/dividendos');
+        $xml->registerXPathNamespace('enajenaciondeacciones', 'http://www.sat.gob.mx/esquemas/retencionpago/1/enajenaciondeacciones');
+        // leyendo nodo raiz
+        $retencion = (object)$this->leer_atributos($xml, '//retenciones:Retenciones');
+        // leyendo subnodos principales
+        $retencion->Emisor = (object)$this->leer_atributos($xml, '//retenciones:Emisor');
+        $retencion->Receptor = (object)$this->leer_atributos($xml, '//retenciones:Receptor') ?: new StdClass();
+        $retencion->Receptor->Nacional = (object)$this->leer_atributos($xml, '//retenciones:Nacional');
+        $retencion->Receptor->Extranjero = (object)$this->leer_atributos($xml, '//retenciones:Extranjero');
+        $retencion->Periodo = (object)$this->leer_atributos($xml, '//retenciones:Periodo');
+        $retencion->Totales = (object)$this->leer_atributos($xml, '//retenciones:Totales');
+        // leyendo complementos
+        $retencion->Complemento = new StdClass();
+        // leyendo dividendos
+        if ($xpath_dividendos = $xml->xpath('//dividendos:Dividendos')) {
+            $retencion->Complemento->Dividendos = (object)$this->leer_atributos($xpath_dividendos) ?: new StdClass();
+            $retencion->Complemento->Dividendos->DividOUtil = (object)$this->leer_atributos($xpath_dividendos, '//dividendos:DividOUtil');
+            $retencion->Complemento->Dividendos->Remanente = (object)$this->leer_atributos($xpath_dividendos, '//dividendos:Remanente');
+        }
+        // leyendo enajenacion de acciones
+        if ($xpath_enajenacion = $xml->xpath('//enajenaciondeacciones:EnajenaciondeAcciones')) {
+            $retencion->Complemento->EnajenaciondeAcciones = (object)$this->leer_atributos($xpath_enajenacion);
+        }
+
+        // retornando la retencion leida
+        return $retencion;
     }
 }
