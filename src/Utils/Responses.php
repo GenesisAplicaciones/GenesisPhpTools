@@ -1,6 +1,6 @@
 <?php
 
-namespace GenesisPhpTools\Responses;
+namespace GenesisPhpTools\Utils;
 
 class Responses
 {

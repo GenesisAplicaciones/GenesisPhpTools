@@ -1,10 +1,11 @@
 <?php
 
-namespace GenesisPhpTools;
+namespace GenesisPhpTools\Comprobantes;
+
 use GenesisPhpTools\Utils\Helpers;
+use \stdClass;
 
-
-class Lector_comprobantes
+class Lector
 {
     private $cfdi, $xml;
     public function __construct()
