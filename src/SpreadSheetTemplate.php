@@ -100,6 +100,7 @@ class SpreadSheetTemplate
                 }
             }
         }
+        $colChar = null;
         // Escribiendo los datos del reporte en el excel
         foreach ($report_data as $i => $row) {
             $fila++;
