@@ -1,7 +1,7 @@
 <?php
 
 namespace GenesisPhpTools;
-use function GenesisPhpTools\Utils\fix_utf8;
+use GenesisPhpTools\Utils\Helpers;
 
 
 class Lector_comprobantes
@@ -104,7 +104,7 @@ class Lector_comprobantes
     {
         $comprobante = $this->xml->xpath('//cfdi:Comprobante');
         foreach ($comprobante[0]->attributes() as $key => $value) {
-            $this->cfdi->{$key} = fix_utf8($value->__toString());
+            $this->cfdi->{$key} = Helpers::fix_utf8($value->__toString());
         }
     }
     private function leer_cfdis_relacionados()
@@ -131,7 +131,7 @@ class Lector_comprobantes
         $emisor = $this->xml->xpath('//cfdi:Comprobante/cfdi:Emisor');
         $atributos = array();
         foreach ($emisor[0]->attributes() as $key => $value) {
-            $atributos[$key] = fix_utf8($value->__toString());
+            $atributos[$key] = Helpers::fix_utf8($value->__toString());
         }
         $this->cfdi->Emisor = (object) $atributos;
     }
@@ -141,7 +141,7 @@ class Lector_comprobantes
         $receptor = $this->xml->xpath('//cfdi:Comprobante/cfdi:Receptor');
         $atributos = array();
         foreach ($receptor[0]->attributes() as $key => $value) {
-            $atributos[$key] = fix_utf8($value->__toString());
+            $atributos[$key] = Helpers::fix_utf8($value->__toString());
         }
         $this->cfdi->Receptor = (object) $atributos;
     }

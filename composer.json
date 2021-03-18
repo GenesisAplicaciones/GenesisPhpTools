@@ -42,7 +42,6 @@
     "autoload": {
         "psr-4": {
             "GenesisPhpTools\\": "src/",
-            "GenesisPhpTools\\Utils\\": "src/utils/"
         }
     }
 }
