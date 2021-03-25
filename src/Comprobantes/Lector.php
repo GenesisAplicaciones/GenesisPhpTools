@@ -554,6 +554,7 @@ class Lector
         $xml->registerXPathNamespace('retenciones', 'http://www.sat.gob.mx/esquemas/retencionpago/1');
         $xml->registerXPathNamespace('dividendos', 'http://www.sat.gob.mx/esquemas/retencionpago/1/dividendos');
         $xml->registerXPathNamespace('enajenaciondeacciones', 'http://www.sat.gob.mx/esquemas/retencionpago/1/enajenaciondeacciones');
+        $xml->registerXPathNamespace('tfd', 'http://www.sat.gob.mx/TimbreFiscalDigital');
         // leyendo nodo raiz
         $retencion = (object)$this->leer_atributos($xml, '//retenciones:Retenciones');
         // leyendo subnodos principales
@@ -574,6 +575,10 @@ class Lector
         // leyendo enajenacion de acciones
         if ($xpath_enajenacion = $xml->xpath('//enajenaciondeacciones:EnajenaciondeAcciones')) {
             $retencion->Complemento->EnajenaciondeAcciones = (object)$this->leer_atributos($xpath_enajenacion);
+        }
+        // leyendo nodo  de acciones
+        if ($xpath_timbrefiscaldigital= $xml->xpath('//tfd:TimbreFiscalDigital')) {
+            $retencion->Complemento->TimbreFiscalDigital = (object)$this->leer_atributos($xpath_timbrefiscaldigital);
         }
 
         // retornando la retencion leida
