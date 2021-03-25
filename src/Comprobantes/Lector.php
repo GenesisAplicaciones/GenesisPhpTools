@@ -29,14 +29,14 @@ class Lector
             } else if (is_object($nodo)) { // si el argumento $nodo es un objeto, se busca el $xpath proporcionado directamente sobre él.
                 $nodo_a_leer = $nodo->xpath($xpath);
             } else { //si no, se regresa NULL, pues no será posible leer ningún atributo
-                return NULL;
+                return [];
             }
         } else { // si no se especifica una ruta $xpath, el nodo a leer será el $nodo pasado como argumento
             $nodo_a_leer = $nodo;
         }
 
         if (!$nodo_a_leer) {
-            return NULL;
+            return [];
         } // si no hay nodo a leer, entonces no hay atributos que leer, por lo que se sale de la funcion
 
         // si se envió $nodo_es_multiple = true se espera el nodo a leer tenga múltiples hijos cada uno con su set de atributos
@@ -54,7 +54,7 @@ class Lector
                 $atributos[$key] = Helpers::fix_utf8($value->__toString());
             }
         }
-        return $atributos;
+        return $atributos ?: [];
     }
 
     public function leer_xml($cadena_xml)
@@ -542,6 +542,94 @@ class Lector
 
     public function leer_retencion(String $xml_str)
     {
+        // declarando valores por defecto a usarse
+        $atributos_basicos = [
+            'Raiz' => [
+                // Atributos constantes con valor por defecto
+                'Version' => '1.0',
+                'Sello' => '0',
+                'Cert' => '0',
+                'NumCert' => '00000000000000000000',
+                //
+                'FolioInt' => '',
+                'FechaExp' => '',
+                'CveRetenc' => '',
+                'DescRetenc' => '',
+            ],
+            'Emisor' => [
+                'RFCEmisor' => '',
+                'NomDenRazSocE' => '',
+                'CURPE' => '',
+            ],
+            'Receptor' => [
+                'Nacionalidad' => '',
+            ],
+            'Receptor:Nacional' => [
+                'RFCRecep' => '',
+                'NomDenRazSocR' => '',
+                'CURPR' => '',
+            ],
+            'Receptor:Extranjero' => [
+                'NumRegIdTrib' => '',
+                'NomDenRazSocR' => '',
+            ],
+            'Periodo' => [
+                'MesIni' => '',
+                'MesFin' => '',
+                'Ejerc' => '',
+            ],
+            'Totales' => [
+                'montoTotOperacion' => '',
+                'montoTotGrav' => '',
+                'montoTotExent' => '',
+                'montoTotRet' => '',
+            ],
+        ];
+
+        $dividendos = [
+            'Raiz' => [
+                // Atributos constantes
+                'Version' => '1.0',
+                //
+            ],
+            'DividOUtil' => [
+                'CveTipDivOUtil' => '',
+                'MontISRAcredRetMexico' => '',
+                'MontISRAcredRetExtranjero' => '',
+                'MontRetExtDivExt' => '',
+                'TipoSocDistrDiv' => '',
+                'MontISRAcredNal' => '',
+                'MontDivAcumNal' => '',
+                'MontDivAcumExt' => '',
+            ],
+            'Remanente' => [
+                'ProporcionRem' => '',
+            ],
+        ];
+
+        $enajenacion = [
+            'Raiz' => [
+                // Atributos constantes
+                'Version' => '1.0',
+                //
+                'ContratoIntermediacion' => '',
+                'Ganancia' => '',
+                'Perdida' => '',
+            ],
+        ];
+
+        $timbrefiscaldigital = [
+            'Raiz' => [
+                'selloCFD' => '',
+                'noCertificadoSAT' => '',
+                'selloSAT' => '',
+                'version' => '',
+                'UUID' => '',
+                'FechaTimbrado' => '',
+            ],
+        ];
+
+        // creando la clase a retornar
         $retencion = new stdClass();
         // cuando es un string XML traido de la BD, hay que remplazar los siguientes caracteres
         $xml_str = str_replace(array("\\\quot;", "&#10;", "\\n", "\\r", "\\\""), array("\quot;", " ", "", "", '"'), $xml_str);
@@ -556,29 +644,71 @@ class Lector
         $xml->registerXPathNamespace('enajenaciondeacciones', 'http://www.sat.gob.mx/esquemas/retencionpago/1/enajenaciondeacciones');
         $xml->registerXPathNamespace('tfd', 'http://www.sat.gob.mx/TimbreFiscalDigital');
         // leyendo nodo raiz
-        $retencion = (object)$this->leer_atributos($xml, '//retenciones:Retenciones');
+        $retencion = (object)array_merge( // usando array_merge para que cuando algo no esté definido en los atributos leidos, se usen los atributos por defecto del primer array
+            $atributos_basicos["Raiz"],
+            $this->leer_atributos($xml, '//retenciones:Retenciones')
+        );
         // leyendo subnodos principales
-        $retencion->Emisor = (object)$this->leer_atributos($xml, '//retenciones:Emisor');
-        $retencion->Receptor = (object)$this->leer_atributos($xml, '//retenciones:Receptor') ?: new StdClass();
-        $retencion->Receptor->Nacional = (object)$this->leer_atributos($xml, '//retenciones:Nacional');
-        $retencion->Receptor->Extranjero = (object)$this->leer_atributos($xml, '//retenciones:Extranjero');
-        $retencion->Periodo = (object)$this->leer_atributos($xml, '//retenciones:Periodo');
-        $retencion->Totales = (object)$this->leer_atributos($xml, '//retenciones:Totales');
+        $retencion->Emisor = (object)array_merge(
+            $atributos_basicos["Emisor"],
+            $this->leer_atributos($xml, '//retenciones:Emisor')
+        );
+        $retencion->Receptor = (object)array_merge(
+            $atributos_basicos["Receptor"],
+            $this->leer_atributos($xml, '//retenciones:Receptor')
+        );
+        $retencion->Receptor->Nacional = (object)array_merge(
+            $atributos_basicos["Receptor:Nacional"],
+            $this->leer_atributos($xml, '//retenciones:Nacional')
+        );
+        $retencion->Receptor->Extranjero = (object)array_merge(
+            $atributos_basicos["Receptor:Extranjero"],
+            $this->leer_atributos($xml, '//retenciones:Extranjero')
+        );
+        $retencion->Periodo = (object)array_merge(
+            $atributos_basicos["Periodo"],
+            $this->leer_atributos($xml, '//retenciones:Periodo')
+        );
+        $retencion->Totales = (object)array_merge(
+            $atributos_basicos["Totales"],
+            $this->leer_atributos($xml, '//retenciones:Totales')
+        );
         // leyendo complementos
         $retencion->Complemento = new StdClass();
         // leyendo dividendos
         if ($xpath_dividendos = $xml->xpath('//dividendos:Dividendos')) {
-            $retencion->Complemento->Dividendos = (object)$this->leer_atributos($xpath_dividendos) ?: new StdClass();
-            $retencion->Complemento->Dividendos->DividOUtil = (object)$this->leer_atributos($xpath_dividendos, '//dividendos:DividOUtil');
-            $retencion->Complemento->Dividendos->Remanente = (object)$this->leer_atributos($xpath_dividendos, '//dividendos:Remanente');
+            $retencion->Complemento->Dividendos = (object)array_merge(
+                $dividendos["Raiz"],
+                $this->leer_atributos($xpath_dividendos)
+            );
+            $retencion->Complemento->Dividendos->DividOUtil = (object)array_merge(
+                $dividendos["DividOUtil"],
+                $this->leer_atributos($xpath_dividendos, '//dividendos:DividOUtil')
+            );
+            $retencion->Complemento->Dividendos->Remanente = (object)array_merge(
+                $dividendos["Remanente"],
+                $this->leer_atributos($xpath_dividendos, '//dividendos:Remanente')
+            );
+        } else {
+            $retencion->Complemento->Dividendos = NULL;
         }
         // leyendo enajenacion de acciones
         if ($xpath_enajenacion = $xml->xpath('//enajenaciondeacciones:EnajenaciondeAcciones')) {
-            $retencion->Complemento->EnajenaciondeAcciones = (object)$this->leer_atributos($xpath_enajenacion);
+            $retencion->Complemento->EnajenaciondeAcciones = (object)array_merge(
+                $enajenacion["Raiz"],
+                $this->leer_atributos($xpath_enajenacion)
+            );
+        } else {
+            $retencion->Complemento->EnajenaciondeAcciones = NULL;
         }
         // leyendo nodo  de acciones
-        if ($xpath_timbrefiscaldigital= $xml->xpath('//tfd:TimbreFiscalDigital')) {
-            $retencion->Complemento->TimbreFiscalDigital = (object)$this->leer_atributos($xpath_timbrefiscaldigital);
+        if ($xpath_timbrefiscaldigital = $xml->xpath('//tfd:TimbreFiscalDigital')) {
+            $retencion->Complemento->TimbreFiscalDigital = (object)array_merge(
+                $timbrefiscaldigital["Raiz"],
+                $this->leer_atributos($xpath_timbrefiscaldigital)
+            );
+        } else {
+            $retencion->Complemento->TimbreFiscalDigital = NULL;
         }
 
         // retornando la retencion leida
