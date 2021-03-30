@@ -38,7 +38,7 @@ class Helpers
     static function fix_utf8($string)
     {
         if (mb_detect_encoding($string) == "UTF-8") {
-            return ForceUTF8\Encoding::fixUTF8($string);
+            return \ForceUTF8\Encoding::fixUTF8($string);
         } else {
             return $string;
         }
@@ -47,15 +47,15 @@ class Helpers
     static function to_utf8($string)
     {
         if (mb_detect_encoding($string) == "UTF-8") {
-            return ForceUTF8\Encoding::fixUTF8($string);
+            return \ForceUTF8\Encoding::fixUTF8($string);
         } else {
-            return ForceUTF8\Encoding::toUTF8($string);
+            return \ForceUTF8\Encoding::toUTF8($string);
         }
     }
 
     static function force_utf8($string)
     {
-        return ForceUTF8\Encoding::toUTF8($string);
+        return \ForceUTF8\Encoding::toUTF8($string);
     }
 
     /**
