@@ -149,7 +149,7 @@ class Helpers
         return empty(trim($field));
     }
 
-    static function is_field_true(&$field, $true_values = [1, "true", "TRUE", 'True'])
+    static function is_field_true(&$field, $true_values = [1, "1", "true", "TRUE", 'True'])
     { //el '&' es para pasar el parametro como referencia y permitir pasar datos nulls o sin definir, y manejalos dentro de la función
         // si no está definido, retornar false
         if (!isset($field)) {
