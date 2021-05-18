@@ -673,6 +673,8 @@ class Lector
             $atributos_basicos["Totales"],
             $this->leer_atributos($xml, '//retenciones:Totales')
         );
+        $retencion->ImpRetenidos = $this->leer_atributos($xml, '//retenciones:ImpRetenidos', true);
+        
         // leyendo complementos
         $retencion->Complemento = new StdClass();
         // leyendo dividendos
