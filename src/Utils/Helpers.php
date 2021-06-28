@@ -134,8 +134,8 @@ class Helpers
      * @param $field El campo a validar si está vacío.
      * @param Array $exceptions El array con los valores que normalmente se considerarían vacíos que se desea que se consideren como "llenos".
      */
-    static function empty_field(&$field, $exceptions = [0, '0'])
-    { //el '&' es para pasar el parametro como referencia y permitir pasar datos nulls o sin definir, y manejalos dentro de la función
+    static function empty_field(&$field, $exceptions = [0, '0']) // el '&' es para pasar el parametro como referencia y permitir pasar datos nulls o sin definir, y manejalos dentro de la función
+    {
         // si no está definido, está vacío
         if (!isset($field)) {
             return true;
@@ -145,12 +145,17 @@ class Helpers
         if (in_array($field, $exceptions, true)) { // se ejecuta in_array en modo estricto para que sea exactamente igual al valor indicado en $exceptions
             return false;
         }
-        // finalmente, se le hace trim para quitar espacios en blanco y luego checar si está vacío con la funcion empty
-        return empty(trim($field));
+        // finalmente, se le hace trim para quitar espacios en blanco
+        if (is_string($field)) {
+            $field = trim($field);
+        }
+
+        // y luego se checa si está vacío con la funcion empty
+        return empty($field);
     }
 
-    static function is_field_true(&$field, $true_values = [1, "1", "true", "TRUE", 'True'])
-    { //el '&' es para pasar el parametro como referencia y permitir pasar datos nulls o sin definir, y manejalos dentro de la función
+    static function is_field_true(&$field, $true_values = [1, "1", "true", "TRUE", 'True']) // el '&' es para pasar el parametro como referencia y permitir pasar datos nulls o sin definir, y manejalos dentro de la función
+    { 
         // si no está definido, retornar false
         if (!isset($field)) {
             return false;

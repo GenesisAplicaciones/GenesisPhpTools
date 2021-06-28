@@ -674,7 +674,10 @@ class Lector
             $this->leer_atributos($xml, '//retenciones:Totales')
         );
         $retencion->ImpRetenidos = $this->leer_atributos($xml, '//retenciones:ImpRetenidos', true);
-        
+        // leyendo Addenda
+        $xpath_addenda = $xml->xpath('//retenciones:Addenda');
+        $retencion->Addenda = $xpath_addenda ? $this->simplexmlInnerText($xpath_addenda[0]) : null;
+
         // leyendo complementos
         $retencion->Complemento = new StdClass();
         // leyendo dividendos
@@ -715,5 +718,17 @@ class Lector
 
         // retornando la retencion leida
         return $retencion;
+    }
+
+    function simplexmlInnerText($node)
+    {
+        $content = "";
+        if($node->children()) {
+            foreach ($node->children() as $child)
+                $content .= $child->asXml();
+        } else {
+            $content = (string) $node;
+        }
+        return $content;
     }
 }
