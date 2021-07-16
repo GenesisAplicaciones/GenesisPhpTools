@@ -673,7 +673,9 @@ class Lector
             $atributos_basicos["Totales"],
             $this->leer_atributos($xml, '//retenciones:Totales')
         );
-        $retencion->ImpRetenidos = $this->leer_atributos($xml, '//retenciones:ImpRetenidos', true);
+        if($this->leer_atributos($xml, '//retenciones:ImpRetenidos')){
+            $retencion->ImpRetenidos = $this->leer_atributos($xml, '//retenciones:ImpRetenidos', true);
+        }
         // leyendo Addenda
         $xpath_addenda = $xml->xpath('//retenciones:Addenda');
         $retencion->Addenda = $xpath_addenda ? $this->simplexmlInnerText($xpath_addenda[0]) : null;
